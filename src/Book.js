@@ -5,6 +5,7 @@ import PropTypes from 'prop-types'
 class Book extends Component {
     static propTypes = {
         book: PropTypes.object.isRequired,
+        update: PropTypes.func.isRequired
     }
 
     state = {
