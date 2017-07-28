@@ -4,33 +4,40 @@ import PropTypes from 'prop-types'
 
 class Book extends Component {
     static propTypes = {
-        book: PropTypes.object.isRequired
+        book: PropTypes.object.isRequired,
+    }
+
+    state = {
+        shelf: "none"
+    }
+
+    componentDidMount() {
+        if (this.props.book.shelf) {
+            this.setState({shelf: this.props.book.shelf})
+        }
     }
 
     render() {
-        const image = new Image();
-        let height = 193;
-        let width = 128;
-        image.src = this.props.book.imageLinks.smallThumbnail;
-
-        image.onload = () => {
-            height = image.naturalHeight;
-            width = image.naturalWidth;
-        }
+        let image = '';
+        image = ( this.props.book.imageLinks && this.props.book.imageLinks.thumbnail )
+        const title = this.props.book.title;
+        const authors = this.props.book.authors && this.props.book.authors.toString();
         return (
+
+
             <div className="book">
                 <div className="book-top">
                     <div className="book-cover"
                          style={
                              {
-                             width: width,
-                             height: height,
-                             backgroundImage: `url(${this.props.book.imageLinks.smallThumbnail})`
+                             width: 128,
+                             height: 194,
+                             backgroundImage: `url(${image})`
                              }
                          }
                     ></div>
                     <div className="book-shelf-changer">
-                        <select>
+                        <select value={this.state.shelf} onChange={(event) => {this.props.update(this.props.book, event.target.value)}}>
                             <option value="none" disabled>Move to...</option>
                             <option value="currentlyReading">Currently Reading</option>
                             <option value="wantToRead">Want to Read</option>
@@ -43,11 +50,11 @@ class Book extends Component {
 
 
                     <div className="book-title">
-                        {this.props.book.title}
+                        {title}
                     </div>
 
                     <div className="book-authors">
-                        {this.props.book.authors.toString()}
+                        {authors}
                     </div>
 
             </div>
