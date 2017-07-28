@@ -7,8 +7,7 @@ import {Link} from 'react-router-dom'
 class Search extends Component {
     state = {
         maxResults: 20,
-        books: [],
-        query: ''
+        books: []
     }
 
     static propTypes = {
@@ -16,19 +15,16 @@ class Search extends Component {
     }
 
     updateQuery = (query) => {
-        this.setState({query: query.trim()})
+        BooksApi
+            .search( query.trim(), this.state.maxResults)
+            .then((books) => {
+                if (!(typeof books.error === 'undefined')) {
+                    this.setState({query: query.trim(), books: []})
+                } else {
+                    this.setState({query: query.trim(), books: books})
+                }
+            })
 
-        if (this.state.query) {
-            BooksApi
-                .search(this.state.query, this.state.maxResults)
-                .then((books) => {
-                    if (typeof books.error === 'undefined') {
-                        this.setState({books: books, hasError: false})
-                    } else {
-                        this.setState({books: [], hasError: true})
-                    }
-                })
-        }
     }
 
     clearQuery = () => {
@@ -48,7 +44,10 @@ class Search extends Component {
 
                     </div>
                 </div>
-                {this.state.books && (
+                {(this.state.books.length === 0) && (<div className="search-books-results">
+                        <h2>No Results</h2>
+                </div>)}
+                {!this.state.books.error && (
                     <div className="search-books-results">
                         <ol className="books-grid">
                             <BookShelf
