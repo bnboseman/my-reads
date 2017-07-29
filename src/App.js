@@ -7,7 +7,9 @@ import './App.css';
 
 class BooksApp extends Component {
     state = {
-        books: []
+        books: [],
+        query: '',
+        searchResults: []
     }
 
     addToShelf = (book, shelf) => {
@@ -16,7 +18,6 @@ class BooksApp extends Component {
                 const books = this.state.books;
                 const index = books.indexOf(book);
                 book.shelf = shelf;
-                console.log(book, index)
                 if (index > -1) {
                     books[index] = book;
                 } else {
@@ -25,6 +26,32 @@ class BooksApp extends Component {
                 this.setState({books: books})
 
             })
+    }
+
+    search =  (query) => {
+        BooksAPI
+            .search( query.trim(), this.state.maxResults)
+            .then((books) => {
+                if (typeof books === 'undefined') {
+                    this.setState({query: query.trim(), searchResults: []})
+                } else {
+                    if (typeof books.error === 'undefined') {
+                        this.setState({query: query.trim(), searchResults: books.map((book)=> {
+                            book.shelf = 'none'
+                            let index = this.state.books.findIndex((shelvedBooks) => {
+                                return shelvedBooks.id === book.id
+                            })
+                            if (index > -1) {
+                                book.shelf = this.state.books[index].shelf
+                            }
+                            return book;
+                        })
+                        })
+                    }
+
+                }
+            })
+
     }
 
     componentDidMount() {
@@ -66,10 +93,15 @@ class BooksApp extends Component {
                 )}/>
 
                 <Route path="/search" render={({history}) => (
-                    <Search addToShelf={(book, shelf) => {
+                    <Search
+                        books={this.state.searchResults}
+                        addToShelf={(book, shelf) => {
                         this.addToShelf(book, shelf)
                         history.push('/')
-                    }}/>
+                    }}
+                        search={this.search}
+
+                    />
                 )}/>
 
             </div>
