@@ -24,39 +24,37 @@ class Book extends Component {
         const title = this.props.book.title;
         const authors = this.props.book.authors && this.props.book.authors.toString();
         return (
-
-
             <div className="book">
                 <div className="book-top">
                     <div className="book-cover"
                          style={
                              {
-                             width: 128,
-                             height: 194,
-                             backgroundImage: `url(${image})`
+                                 width: 128,
+                                 height: 194,
+                                 backgroundImage: `url(${image})`
                              }
-                         }
-                    ></div>
+                         }>
+
+                    </div>
                     <div className="book-shelf-changer">
-                        <select value={this.state.shelf} onChange={(event) => {this.props.update(this.props.book, event.target.value)}}>
+                        <select value={this.state.shelf} onChange={
+                            (event) => {
+                                this.props.update(this.props.book, event.target.value)
+                                this.setState({shelf: event.target.value})
+                            }}>
                             <option value="none" disabled>Move to...</option>
                             <option value="currentlyReading">Currently Reading</option>
                             <option value="wantToRead">Want to Read</option>
                             <option value="read">Read</option>
                             <option value="none">None</option>
-                        </select>
+                            </select>
+                            </div>
+
                     </div>
 
-                </div>
+                <div className="book-title">{title}</div>
 
-
-                    <div className="book-title">
-                        {title}
-                    </div>
-
-                    <div className="book-authors">
-                        {authors}
-                    </div>
+                <div className="book-authors">{authors}</div>
 
             </div>
         )

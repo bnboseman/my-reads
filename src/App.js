@@ -28,24 +28,31 @@ class BooksApp extends Component {
             })
     }
 
-    search =  (query) => {
+    search = (query) => {
         BooksAPI
-            .search( query.trim(), this.state.maxResults)
+            .search(query.trim(), this.state.maxResults)
             .then((books) => {
                 if (typeof books === 'undefined') {
                     this.setState({query: query.trim(), searchResults: []})
                 } else {
                     if (typeof books.error === 'undefined') {
-                        this.setState({query: query.trim(), searchResults: books.map((book)=> {
-                            book.shelf = 'none'
-                            let index = this.state.books.findIndex((shelvedBooks) => {
-                                return shelvedBooks.id === book.id
+                        // Remove duplicate ids which are being returned
+                        books = books.filter((book, index, self) => self.findIndex((b) => {
+                            return book.id === b.id
+                        }) === index)
+
+                        this.setState({
+                            query: query.trim(), searchResults: books.map((book) => {
+                                let index = this.state.books.findIndex((shelvedBooks) => {
+                                    return shelvedBooks.id === book.id
+                                })
+                                if (index > -1) {
+                                    book.shelf = this.state.books[index].shelf
+                                } else {
+                                    book.shelf = 'none'
+                                }
+                                return book;
                             })
-                            if (index > -1) {
-                                book.shelf = this.state.books[index].shelf
-                            }
-                            return book;
-                        })
                         })
                     }
 
@@ -61,6 +68,11 @@ class BooksApp extends Component {
     }
 
     render() {
+        const shelves = {
+            currentlyReading: "Currently Reading",
+            wantToRead: "Want to Read",
+            read: "Read"
+        }
         return (
             <div className="App">
                 <Route path="/" exact render={() => (
@@ -70,20 +82,12 @@ class BooksApp extends Component {
                         </div>
                         <div className="list-books-content">
                             <div>
-                                <BookShelf title="Currently Reading" update={this.addToShelf}
-                                           books={this.state.books.filter(book => {
-                                               return book.shelf === 'currentlyReading'
-                                           })}/>
-
-                                <BookShelf title="Want to Read" update={this.addToShelf}
-                                           books={this.state.books.filter(book => {
-                                               return book.shelf === 'wantToRead'
-                                           })}/>
-
-                                <BookShelf title="Read" update={this.addToShelf}
-                                           books={this.state.books.filter(book => {
-                                               return book.shelf === 'read'
-                                           })}/>
+                                {Object.keys(shelves).map((key) => {
+                                    return (<BookShelf key={key} title={shelves[key]} update={this.addToShelf}
+                                                       books={this.state.books.filter(book => {
+                                                           return book.shelf === key
+                                                       })}/>)
+                                })}
                             </div>
                             <div className="open-search">
                                 <Link to="search">Add a book</Link>
@@ -92,13 +96,12 @@ class BooksApp extends Component {
                     </div>
                 )}/>
 
-                <Route path="/search" render={({history}) => (
+                <Route path="/search" render={() => (
                     <Search
                         books={this.state.searchResults}
                         addToShelf={(book, shelf) => {
-                        this.addToShelf(book, shelf)
-                        history.push('/')
-                    }}
+                            this.addToShelf(book, shelf)
+                        }}
                         search={this.search}
 
                     />
