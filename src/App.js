@@ -13,19 +13,17 @@ class BooksApp extends Component {
     }
 
     addToShelf = (book, shelf) => {
+      if (book.shelf !== shelf){
         BooksAPI.update(book, shelf)
-            .then((result) => {
-                const books = this.state.books;
-                const index = books.indexOf(book);
-                book.shelf = shelf;
-                if (index > -1) {
-                    books[index] = book;
-                } else {
-                    books.push(book);
-                }
-                this.setState({books: books})
+          .then((result) => {
+          book.shelf = shelf;
+            this.setState(state => ({
+              books: state.books.filter(b => b.id !== book.id).concat([ book ])
+            }))
 
-            })
+          })
+      }
+
     }
 
     search = (query) => {
